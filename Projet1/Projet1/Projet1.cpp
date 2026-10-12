@@ -15,14 +15,10 @@ struct Map {
 
 
 
-
 struct Hero {
 
     int hp = 1;
     char pos = 'H'; 
-
-
-
 
 };
 
