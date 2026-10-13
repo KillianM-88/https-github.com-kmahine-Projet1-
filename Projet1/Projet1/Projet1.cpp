@@ -2,6 +2,7 @@
 //
 
 #include <iostream>
+#include <windows.h>
 
 struct Map {
 
@@ -9,6 +10,8 @@ struct Map {
     char water = '~';
     char moutain = 'A';
     char grille[10][20] = {};
+    int grillenb[10][20] = {};
+
   
 
 };
@@ -19,12 +22,19 @@ struct Hero {
 
     int hp = 1;
     char pos = 'H'; 
+    bool droite = false;
+    bool gauche = false;
+    bool haut = false;
+    bool bas = false;
+    
+    
+
 
 };
 
 void init_map(Map& map, Hero& hero) {
 
-    //char grille[10][20] = {};  // a voir pour le changer en attribut de Map ou pas
+    //char grille[10][20] = {};  // a voir pour le changer en attribut de Map ou pasg
 
     // char waterzone[2] = { grille[5][6], grille[5][7] };   A continuer pour optimiser la mise en place les zones d'eau ou montagnes via des tableaux
      //for (int i = 0; i < 2; ++i) {
@@ -38,33 +48,146 @@ void init_map(Map& map, Hero& hero) {
     map.grille[0][0] = hero.pos;
 
 
-    for (int ligne = 0; ligne < 10; ++ligne) {
-        for (int colonne = 0; colonne < 20; ++colonne) {
 
-            if (map.grille[ligne][colonne] != map.water && map.grille[ligne][colonne] != map.moutain && map.grille[ligne][colonne] != hero.pos){
+    for (int x = 0; x < 10; ++x) {
+        for (int y = 0; y < 20; ++y) {
 
-                map.grille[ligne][colonne] = map.basic_ground;
+            if (map.grille[x][y] != map.water && map.grille[x][y] != map.moutain && map.grille[x][y] != hero.pos) {
+
+                map.grille[x][y] = map.basic_ground;
 
 
             }
-            std::cout << map.grille[ligne][colonne] << ' ';
-
+            std::cout << map.grille[x][y] << ' ';
 
         };
         std::cout << '\n';
+
 
     };
 
 
 }
 
+void init_map2(Map& map, Hero& hero) {
+
+    //char grille[10][20] = {};  // a voir pour le changer en attribut de Map ou pasg
+
+    // char waterzone[2] = { grille[5][6], grille[5][7] };   A continuer pour optimiser la mise en place les zones d'eau ou montagnes via des tableaux
+     //for (int i = 0; i < 2; ++i) {
+       //  waterzone[i] = map.water;
+     //}
+
+
+    map.grillenb[5][6] = 1;
+    map.grillenb[5][7] = 1;
+    map.grillenb[9][2] = 2;
+    map.grillenb[0][0] = 10;
+
+
+
+    for (int x = 0; x < 10; ++x) {
+        for (int y = 0; y < 20; ++y) {
+
+            if (map.grillenb[x][y] = 10) {
+
+                map.grille[x][y] = hero.pos;
+
+            }
+
+            if (map.grillenb[x][y] = 1) {
+
+                map.grille[x][y] = map.water;
+
+            }
+            if (map.grillenb[x][y] = 2 ) {
+
+                map.grille[x][y] = map.moutain;
+
+            }
+            
+            else {
+                map.grille[x][y] = map.basic_ground;
+            }
+
+            std::cout << map.grille[x][y] << ' ';
+
+        }
+        std::cout << '\n';
+
+
+    }
+
+
+}
+
+void afficher_map(Map & map, Hero & hero) {
+
+    
+
+    if (GetAsyncKeyState('S') & 0x53) {
+
+
+        //std::cout << "Hourra";
+        // hero.pos = map.grille[x][y + 1];
+
+
+
+        for (int x = 0; x < 10; ++x) {
+            for (int y = 0; y < 20; ++y) {
+                if (hero.pos = map.grille[x][y]) {
+
+                    hero.pos = map.grille[x][y + 1];
+                    
+
+                }
+                std::cout << map.grille[x][y] << ' ';
+                
+
+            }
+            std::cout << '\n';
+        }
+
+            
+           // std::cout << map.grille[x][y];
+    }
+      
+
+}
 int main(){
 
     Map map{};
     Hero hero{};
 
-    init_map(map, hero);
-    //deplacement(hero, map);
+  
+    init_map2(map, hero);
+   
+
+   
+    
+    while (true) {
+
+       //afficher_map(map, hero);
+
+       /*
+       for (int x = 0; x < 10; ++x) {
+           for (int y = 0; y < 20; ++y) {
+
+               std::cout << map.grille[x][y];
+           }
+
+       }
+       */
+ 
+        if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {
+            std::cout << "Touche Echap detectee !\n";
+            break;
+        }
+
+    }
+
+   
+    
 
 
     return 0;
