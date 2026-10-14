@@ -3,14 +3,17 @@
 
 #include <iostream>
 #include <windows.h>
+#include <cstdlib>
+#include <conio.h> // Fournit _getch() sous Windows
+
 
 struct Map {
 
     char basic_ground = '.';
     char water = '~';
     char moutain = 'A';
-    char grille[10][20] = {};
-    int grillenb[10][20] = {};
+    //char grille[10][20] = {};
+    int grille[10][20] = {};
 
   
 
@@ -21,6 +24,8 @@ struct Map {
 struct Hero {
 
     int hp = 1;
+    int x = 0;
+    int y = 0;
     char pos = 'H'; 
     bool droite = false;
     bool gauche = false;
@@ -42,121 +47,66 @@ void init_map(Map& map, Hero& hero) {
      //}
 
 
-    map.grille[5][6] = map.water;
-    map.grille[5][7] = map.water;
-    map.grille[9][2] = map.moutain;
-    map.grille[0][0] = hero.pos;
+  
+    for (int x = 0; x < 10; ++x) {
+        for (int y = 0; y < 20; ++y) {
 
+            map.grille[x][y] = 0;
 
+        };
+ 
+    };
+
+    map.grille[5][6] = 1;
+    map.grille[5][7] = 1;
+    map.grille[9][2] = 2;
+
+    char cell = '0';
 
     for (int x = 0; x < 10; ++x) {
         for (int y = 0; y < 20; ++y) {
 
-            if (map.grille[x][y] != map.water && map.grille[x][y] != map.moutain && map.grille[x][y] != hero.pos) {
+            if (map.grille[x][y] == 1) {
 
-                map.grille[x][y] = map.basic_ground;
 
+                char cell = map.water;
+                std::cout << cell;
 
             }
-            std::cout << map.grille[x][y] << ' ';
+
+            else if (map.grille[x][y] == 2) {
+
+                char cell = map.moutain;
+                std::cout << cell;
+
+            }
+            else {
+                char cell = map.basic_ground;
+                std::cout << cell;
+            }
+
 
         };
+       
         std::cout << '\n';
-
-
     };
 
 
 }
 
-void init_map2(Map& map, Hero& hero) {
 
-    //char grille[10][20] = {};  // a voir pour le changer en attribut de Map ou pasg
-
-    // char waterzone[2] = { grille[5][6], grille[5][7] };   A continuer pour optimiser la mise en place les zones d'eau ou montagnes via des tableaux
-     //for (int i = 0; i < 2; ++i) {
-       //  waterzone[i] = map.water;
-     //}
-
-
-    map.grillenb[5][6] = 1;
-    map.grillenb[5][7] = 1;
-    map.grillenb[9][2] = 2;
-    map.grillenb[0][0] = 10;
-
-
-
-    for (int x = 0; x < 10; ++x) {
-        for (int y = 0; y < 20; ++y) {
-
-            if (map.grillenb[x][y] = 10) {
-
-                map.grille[x][y] = hero.pos;
-
-            }
-
-            if (map.grillenb[x][y] = 1) {
-
-                map.grille[x][y] = map.water;
-
-            }
-            if (map.grillenb[x][y] = 2 ) {
-
-                map.grille[x][y] = map.moutain;
-
-            }
-            
-            else {
-                map.grille[x][y] = map.basic_ground;
-            }
-
-            std::cout << map.grille[x][y] << ' ';
-
-        }
-        std::cout << '\n';
-
-
-    }
-
-
-}
 
 void afficher_map(Map & map, Hero & hero) {
 
    
-    if ((GetAsyncKeyState('S') & 0x8000)) {
+    char touche = _getch();
 
-        hero.bas = true;
+
+    if (touche == 's' || touche == 's') {
+        std::cout << "-> Effet declenche : Action activee !"  ;
         
     }
-    
 
-    if (hero.bas == true) {
-
-     
-        std::cout << "Hourra";  // ca marcheeee
-        // hero.pos = map.grille[x][y + 1];
-
-
-        /*
-        for (int x = 0; x < 10; ++x) {
-            for (int y = 0; y < 20; ++y) {
-                if (hero.pos = map.grille[x][y]) {
-
-                    hero.pos = map.grille[x][y + 1];
-                    
-
-                }
-                std::cout << map.grille[x][y] << ' ';
-                
-
-            }
-            std::cout << '\n';
-        }*/
-
-            
-           // std::cout << map.grille[x][y];
-    }
       
 
 }
@@ -176,15 +126,6 @@ int main(){
 
        afficher_map(map, hero);
 
-       /*
-       for (int x = 0; x < 10; ++x) {
-           for (int y = 0; y < 20; ++y) {
-
-               std::cout << map.grille[x][y];
-           }
-
-       }
-       */
  
         if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {
             std::cout << "Touche Echap detectee !\n";
