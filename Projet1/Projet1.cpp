@@ -5,6 +5,8 @@
 #include <windows.h>
 #include <cstdlib>
 #include <conio.h> // Fournit _getch() sous Windows
+#include <chrono> // Pour std::chrono::seconds / milliseconds
+#include <thread> // Pour std::this_thread::sleep_for
 
 
 struct Map {
@@ -12,6 +14,7 @@ struct Map {
     char basic_ground = '.';
     char water = '~';
     char moutain = 'A';
+    char enemies = 'X';
     int grille[10][20] = {};
 
   
@@ -23,7 +26,7 @@ struct Map {
 struct Hero {
 
     int hp = 1;
-    int pos = 10;
+    //int pos = 10;
     int x = 0;
     int y = 0;
     char cell = 'H'; 
@@ -52,6 +55,11 @@ void init_map(Map& map, Hero& hero) {
     map.grille[5][6] = 1;
     map.grille[5][7] = 1;
     map.grille[9][2] = 2;
+    map.grille[0][7] = 3;
+    map.grille[8][4] = 3;
+    map.grille[2][10] = 3;
+    map.grille[7][7] = 3;
+    map.grille[6][3] = 3;
 
 
 }
@@ -61,6 +69,7 @@ void afficher_map(Map& map, Hero& hero) {
 
 
     system("cls");
+
     
 
     for (int x = 0; x < 10; ++x) {
@@ -73,6 +82,12 @@ void afficher_map(Map& map, Hero& hero) {
             else if (map.grille[x][y] == 1) {
                 std::cout << map.water;
             }
+
+            else if (map.grille[x][y] == 3) {
+
+                std::cout << map.enemies;
+            }
+
             else if (map.grille[x][y] == 2) {
                 std::cout << map.moutain;
             }
@@ -83,6 +98,18 @@ void afficher_map(Map& map, Hero& hero) {
         }
         std::cout << '\n';
     }
+    std::cout << "Vous avez : " << hero.hp << " vie";
+    if (hero.hp <= 0) {
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        /*
+        while (_kbhit()) {
+            _getch();
+        }*/
+        system("cls");
+        std::cout << "\n";
+        std::cout << "  Game over !! ";
+
+    }
 }
 
 
@@ -92,7 +119,14 @@ void deplacement(Map& map, Hero& hero) {
 
     if ((touche == 'z' || touche == 'Z' ) && hero.x > 0 ) {
 
-        if (map.grille[(hero.x-1)][hero.y] == 0) {
+        if (map.grille[(hero.x - 1)][hero.y] == 3) {
+
+            
+            hero.x--;
+            hero.hp--;
+        }
+
+        else if (map.grille[(hero.x-1)][hero.y] == 0) {
 
             hero.x--;
         }
@@ -101,7 +135,13 @@ void deplacement(Map& map, Hero& hero) {
 
     else if ((touche == 's' || touche == 'S' ) && hero.x < 9) {
 
-        if (map.grille[(hero.x + 1)][hero.y] == 0) {
+        if (map.grille[(hero.x + 1)][hero.y] == 3) {
+
+            hero.x++;
+            hero.hp--;
+        }
+
+        else if (map.grille[(hero.x + 1)][hero.y] == 0) {
 
             hero.x++;
         }
@@ -109,15 +149,28 @@ void deplacement(Map& map, Hero& hero) {
 
     else if ((touche == 'q' || touche == 'Q' ) && hero.y > 0 ) {
 
-        if (map.grille[hero.x][(hero.y - 1)] == 0) {
+        if (map.grille[(hero.x)][hero.y - 1] == 3) {
+
+            hero.y--;
+            hero.hp--;
+        }
+
+        else if (map.grille[hero.x][(hero.y - 1)] == 0) {
 
             hero.y--;
         }
         
     }
+
     else if ((touche == 'd' || touche == 'D' ) && hero.y < 19 ) {
 
-        if (map.grille[hero.x][(hero.y + 1)] == 0) {
+        if (map.grille[(hero.x)][hero.y + 1] == 3) {
+
+            hero.y++;
+            hero.hp--;
+        }
+
+        else if (map.grille[hero.x][(hero.y + 1)] == 0) {
 
             hero.y++;
         }
@@ -125,6 +178,7 @@ void deplacement(Map& map, Hero& hero) {
     }
     
 }
+
 
 
 
@@ -146,6 +200,9 @@ int main(){
        
        afficher_map(map, hero);
        deplacement(map, hero);
+
+       
+       
 
  
         if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {
