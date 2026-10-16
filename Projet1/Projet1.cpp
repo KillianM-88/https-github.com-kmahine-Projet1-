@@ -14,10 +14,8 @@ struct Map {
     char basic_ground = '.';
     char water = '~';
     char moutain = 'A';
-    char enemies = 'X';
+    //char enemies = 'X';
     int grille[10][20] = {};
-
-  
 
 };
 
@@ -34,13 +32,23 @@ struct Hero {
     bool gauche = false;
     bool haut = false;
     bool bas = false;*/
-    
-    
-
 
 };
 
-void init_map(Map& map, Hero& hero) {
+struct Enemy {
+
+    int hp = 1;
+    //int pos = 10;
+    int x = 0;
+    int y = 0;
+    char cell = 'X';
+    /*bool droite = false;
+    bool gauche = false;
+    bool haut = false;
+    bool bas = false;*/
+
+};
+void init_map(Map& map, Hero& hero, Enemy& enemy) {
 
     for (int x = 0; x < 10; ++x) {
         for (int y = 0; y < 20; ++y) {
@@ -55,7 +63,13 @@ void init_map(Map& map, Hero& hero) {
     map.grille[5][6] = 1;
     map.grille[5][7] = 1;
     map.grille[9][2] = 2;
-    map.grille[0][7] = 3;
+
+
+    enemy.x = 0 ;
+    enemy.y = 7;
+    map.grille[enemy.x ][enemy.y] = 3;
+   
+
     map.grille[8][4] = 3;
     map.grille[2][10] = 3;
     map.grille[7][7] = 3;
@@ -65,7 +79,7 @@ void init_map(Map& map, Hero& hero) {
 }
 
 
-void afficher_map(Map& map, Hero& hero) {
+void afficher_map(Map& map, Hero& hero, Enemy& enemy) {
 
 
     system("cls");
@@ -79,14 +93,17 @@ void afficher_map(Map& map, Hero& hero) {
                 std::cout << hero.cell;
             }
 
+            else if (x == enemy.x && y == enemy.y) {
+
+                std::cout << enemy.cell;
+            }
+
+
             else if (map.grille[x][y] == 1) {
                 std::cout << map.water;
             }
 
-            else if (map.grille[x][y] == 3) {
-
-                std::cout << map.enemies;
-            }
+            
 
             else if (map.grille[x][y] == 2) {
                 std::cout << map.moutain;
@@ -99,23 +116,14 @@ void afficher_map(Map& map, Hero& hero) {
         std::cout << '\n';
     }
     std::cout << "Vous avez : " << hero.hp << " vie";
-    if (hero.hp <= 0) {
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-        /*
-        while (_kbhit()) {
-            _getch();
-        }*/
-        system("cls");
-        std::cout << "\n";
-        std::cout << "  Game over !! ";
-
-    }
+    
 }
 
 
 void deplacement(Map& map, Hero& hero) {
 
     char touche = _getch();
+
 
     if ((touche == 'z' || touche == 'Z' ) && hero.x > 0 ) {
 
@@ -179,46 +187,61 @@ void deplacement(Map& map, Hero& hero) {
     
 }
 
+void gameover(Map& map, Hero& hero) {
+
+    while (_kbhit()) (void)_getch();
+
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    while (_kbhit()) (void)_getch();
+
+    system("cls");
+
+    std::cout << "\n";
+    std::cout << "  Game over !! ";
+    std::cout << "\n";
+
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+
+}
 
 
 
 
-int main(){
+int main() {
 
     Map map{};
     Hero hero{};
+    Enemy enemy{};
 
-  
-    init_map(map, hero);
-   
+    init_map(map, hero, enemy);
 
    
-    
+    afficher_map(map, hero, enemy);
+
     while (true) {
 
 
-       
-       afficher_map(map, hero);
-       deplacement(map, hero);
+        deplacement(map, hero);
 
-       
-       
 
- 
+        if (hero.hp <= 0) {
+            afficher_map(map, hero, enemy);
+            gameover(map, hero);
+            break;
+        }
+
+        afficher_map(map, hero, enemy);
+
+
+        // Touche Échap pour quitter
         if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {
-            std::cout << "Touche Echap detectee !\n";
             break;
         }
 
     }
 
-   
-    
-
-  
     return 0;
-
-    
 }
 
 // Exécuter le programme : Ctrl+F5 ou menu Déboguer > Exécuter sans débogage
