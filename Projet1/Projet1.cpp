@@ -187,6 +187,10 @@ void deplacement(Map& map, Hero& hero) {
     
 }
 
+void deplacement(Map& map, Hero& hero) {
+
+}
+
 void gameover(Map& map, Hero& hero) {
 
     while (_kbhit()) (void)_getch();
@@ -213,6 +217,7 @@ int main() {
     Map map{};
     Hero hero{};
     Enemy enemy{};
+    //Enemy enemy2{};
 
     init_map(map, hero, enemy);
 
