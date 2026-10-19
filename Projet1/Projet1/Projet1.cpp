@@ -48,7 +48,7 @@ struct Enemy {
     bool bas = false;*/
 
 };
-void init_map(Map& map, Hero& hero, Enemy& enemy, Enemy& enemy2) {
+void init_map(Map& map, Hero& hero, Enemy tab[]) {
 
     for (int x = 0; x < 10; ++x) {
         for (int y = 0; y < 20; ++y) {
@@ -72,11 +72,11 @@ void init_map(Map& map, Hero& hero, Enemy& enemy, Enemy& enemy2) {
     map.grille[9][18] = 2;
     map.grille[7][14] = 2;
 
-    enemy.x = 0 ;
-    enemy.y = 7;
+    tab[0].x = 0;
+    tab[0].y = 7;
 
-    enemy2.x = 6;
-    enemy2.y = 14;
+    tab[1].x = 6;
+    tab[1].y = 14;
 
 
 
@@ -91,32 +91,38 @@ void afficher_map(Map& map, Hero& hero, Enemy tab[]) {
 
     system("cls");
 
-
     for (int x = 0; x < 10; ++x) {
         for (int y = 0; y < 20; ++y) {
+
+            bool caselibre = true;
 
             for (int i = 0; i < 2; ++i) {
 
                 if (x == tab[i].x && y == tab[i].y) {
 
                     std::cout << tab[i].cell;
+                    caselibre = false;
+
+                }
+            }
+
+            if (caselibre == true) {
+
+                if (x == hero.x && y == hero.y) {
+                    std::cout << hero.cell;
                 }
 
-            }
+                else if (map.grille[x][y] == 1) {
+                    std::cout << map.water;
+                }
 
-            if (x == hero.x && y == hero.y) {
-                std::cout << hero.cell;
-            }
+                else if (map.grille[x][y] == 2) {
+                    std::cout << map.moutain;
+                }
+                else {
+                    std::cout << map.basic_ground;
+                }
 
-            else if (map.grille[x][y] == 1) {
-                std::cout << map.water;
-            }
-
-            else if (map.grille[x][y] == 2) {
-                std::cout << map.moutain;
-            }
-            else {
-                std::cout << map.basic_ground;
             }
 
         }
@@ -172,9 +178,11 @@ void deplacement(Map& map, Hero& hero) {
 
 void deplacement2(Map& map, Hero& hero, Enemy tab[]) {
 
-    int nb = 1 + rand() % 4; // rand() % 4 donne un reste compris entre 0 et 3 car le reste d'une division par 4 vaut toujours 0, 1, 2 ou 3
+    //int nb = 1 + rand() % 4; // rand() % 4 donne un reste compris entre 0 et 3 car le reste d'une division par 4 vaut toujours 0, 1, 2 ou 3
 
     for (int i = 0; i < 2; ++i) {
+
+        int nb = 1 + rand() % 4; // rand() % 4 donne un reste compris entre 0 et 3 car le reste d'une division par 4 vaut toujours 0, 1, 2 ou 3
 
         if (nb == 1 && tab[i].x > 0) {
 
@@ -261,14 +269,14 @@ int main() {
 
     Map map{};
     Hero hero{};
-    Enemy enemy{};
-    Enemy enemy2{};
+    //Enemy enemy{};
+    //Enemy enemy2{};
    
     
     //Enemy enemy3{};
-
-    init_map(map, hero, enemy, enemy2);
-    Enemy tab[] = { enemy, enemy2 };
+    Enemy tab[2];
+    init_map(map, hero, tab);
+    
 
    
     afficher_map(map, hero, tab);
