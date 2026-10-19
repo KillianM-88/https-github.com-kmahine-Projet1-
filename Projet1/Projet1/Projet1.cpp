@@ -3,16 +3,19 @@
 
 #include <iostream>
 #include <windows.h>
+#include <cstdlib>
+#include <conio.h> // Fournit _getch() sous Windows
+#include <chrono> // Pour std::chrono::seconds / milliseconds
+#include <thread> // Pour std::this_thread::sleep_for
+
 
 struct Map {
 
     char basic_ground = '.';
     char water = '~';
     char moutain = 'A';
-    char grille[10][20] = {};
-    int grillenb[10][20] = {};
-
-  
+    //char enemies = 'X';
+    int grille[10][20] = {};
 
 };
 
@@ -21,178 +24,283 @@ struct Map {
 struct Hero {
 
     int hp = 1;
-    char pos = 'H'; 
-    bool droite = false;
+    //int pos = 10;
+    int x = 0;
+    int y = 0;
+    char cell = 'H'; 
+    /*bool droite = false;
     bool gauche = false;
     bool haut = false;
-    bool bas = false;
-    
-    
-
+    bool bas = false;*/
 
 };
 
-void init_map(Map& map, Hero& hero) {
+struct Enemy {
 
-    //char grille[10][20] = {};  // a voir pour le changer en attribut de Map ou pasg
+    int hp = 1;
+    //int pos = 10;
+    int x = 0;
+    int y = 0;
+    char cell = 'X';
+    /*bool droite = false;
+    bool gauche = false;
+    bool haut = false;
+    bool bas = false;*/
 
-    // char waterzone[2] = { grille[5][6], grille[5][7] };   A continuer pour optimiser la mise en place les zones d'eau ou montagnes via des tableaux
-     //for (int i = 0; i < 2; ++i) {
-       //  waterzone[i] = map.water;
-     //}
-
-
-    map.grille[5][6] = map.water;
-    map.grille[5][7] = map.water;
-    map.grille[9][2] = map.moutain;
-    map.grille[0][0] = hero.pos;
-
-
+};
+void init_map(Map& map, Hero& hero, Enemy& enemy, Enemy& enemy2) {
 
     for (int x = 0; x < 10; ++x) {
         for (int y = 0; y < 20; ++y) {
+            map.grille[x][y] = 0;
+        }
+    }
 
-            if (map.grille[x][y] != map.water && map.grille[x][y] != map.moutain && map.grille[x][y] != hero.pos) {
+    // char waterzone[2] = { grille[5][6], grille[5][7] };   A continuer pour optimiser la mise en place les zones d'eau ou montagnes via des tableaux
+    //for (int i = 0; i < 2; ++i) {
+    //  waterzone[i] = map.water;
+    //}
 
-                map.grille[x][y] = map.basic_ground;
+    // liste des waterzones
+    map.grille[5][6] = 1;
+    map.grille[5][7] = 1;
+    map.grille[3][15] = 1;
+    map.grille[3][16] = 1;
+
+    // liste des montagnes
+    map.grille[9][2] = 2;
+    map.grille[9][18] = 2;
+    map.grille[7][14] = 2;
+
+    enemy.x = 0 ;
+    enemy.y = 7;
+
+    enemy2.x = 6;
+    enemy2.y = 14;
 
 
-            }
-            std::cout << map.grille[x][y] << ' ';
-
-        };
-        std::cout << '\n';
 
 
-    };
 
 
 }
 
-void init_map2(Map& map, Hero& hero) {
 
-    //char grille[10][20] = {};  // a voir pour le changer en attribut de Map ou pasg
-
-    // char waterzone[2] = { grille[5][6], grille[5][7] };   A continuer pour optimiser la mise en place les zones d'eau ou montagnes via des tableaux
-     //for (int i = 0; i < 2; ++i) {
-       //  waterzone[i] = map.water;
-     //}
+void afficher_map(Map& map, Hero& hero, Enemy tab[]) {
 
 
-    map.grillenb[5][6] = 1;
-    map.grillenb[5][7] = 1;
-    map.grillenb[9][2] = 2;
-    map.grillenb[0][0] = 10;
-
+    system("cls");
 
 
     for (int x = 0; x < 10; ++x) {
         for (int y = 0; y < 20; ++y) {
 
-            if (map.grillenb[x][y] = 10) {
+            for (int i = 0; i < 2; ++i) {
 
-                map.grille[x][y] = hero.pos;
+                if (x == tab[i].x && y == tab[i].y) {
 
-            }
-
-            if (map.grillenb[x][y] = 1) {
-
-                map.grille[x][y] = map.water;
+                    std::cout << tab[i].cell;
+                }
 
             }
-            if (map.grillenb[x][y] = 2 ) {
 
-                map.grille[x][y] = map.moutain;
-
+            if (x == hero.x && y == hero.y) {
+                std::cout << hero.cell;
             }
-            
+
+            else if (map.grille[x][y] == 1) {
+                std::cout << map.water;
+            }
+
+            else if (map.grille[x][y] == 2) {
+                std::cout << map.moutain;
+            }
             else {
-                map.grille[x][y] = map.basic_ground;
+                std::cout << map.basic_ground;
             }
-
-            std::cout << map.grille[x][y] << ' ';
 
         }
         std::cout << '\n';
-
-
     }
-
-
+    std::cout << "Vous avez : " << hero.hp << " vie";
+    
 }
 
-void afficher_map(Map & map, Hero & hero) {
 
+void deplacement(Map& map, Hero& hero) {
+
+    char touche = _getch();
+
+
+    if ((touche == 'z' || touche == 'Z' ) && hero.x > 0 ) {
+
+        if (map.grille[(hero.x-1)][hero.y] == 0) {
+
+            hero.x--;
+        }
+        
+    }
+
+    else if ((touche == 's' || touche == 'S' ) && hero.x < 9) {
+
+
+        if (map.grille[(hero.x + 1)][hero.y] == 0) {
+
+            hero.x++;
+        }
+    }
+
+    else if ((touche == 'q' || touche == 'Q' ) && hero.y > 0 ) {
+
+        if (map.grille[hero.x][(hero.y - 1)] == 0) {
+
+            hero.y--;
+        }
+        
+    }
+
+    else if ((touche == 'd' || touche == 'D' ) && hero.y < 19 ) {
+
+        if (map.grille[hero.x][(hero.y + 1)] == 0) {
+
+            hero.y++;
+        }
+
+    }
+    
+}
+
+void deplacement2(Map& map, Hero& hero, Enemy tab[]) {
+
+    //int nb = 1 + rand() % 4; // rand() % 4 donne un reste compris entre 0 et 3 car le reste d'une division par 4 vaut toujours 0, 1, 2 ou 3
+
+    for (int i = 0; i < 2; ++i) {
+
+        int nb = 1 + rand() % 4; // rand() % 4 donne un reste compris entre 0 et 3 car le reste d'une division par 4 vaut toujours 0, 1, 2 ou 3
+
+        if (nb == 1 && tab[i].x > 0) {
+
+            if ((tab[i].x - 1) == hero.x && tab[i].y == hero.y) {
+
+                hero.hp--;
+            }
+
+            else if (map.grille[(tab[i].x - 1)][tab[i].y] == 0) {
+
+                tab[i].x--;
+            }
+
+        }
+
+        else if (nb == 2 && tab[i].x < 9) {
+
+            if ((tab[i].x + 1) == hero.x && tab[i].y == hero.y) {
+
+                hero.hp--;
+            }
+
+            else if (map.grille[tab[i].x + 1][tab[i].y] == 0) {
+
+                tab[i].x++;
+            }
+
+        }
+
+        else if (nb == 3 && tab[i].y > 0) {
+
+            if (tab[i].x == hero.x && (tab[i].y - 1) == hero.y) {
+
+                hero.hp--;
+            }
+
+            else if (map.grille[tab[i].x][tab[i].y - 1] == 0) {
+
+                tab[i].y--;
+            }
+        }
+
+        else if (nb == 4 && tab[i].y < 19) {
+
+            if (tab[i].x == hero.x && (tab[i].y + 1) == hero.y) {
+
+                hero.hp--;
+            }
+
+            else if (map.grille[tab[i].x][tab[i].y + 1] == 0) {
+
+                tab[i].y++;
+            }
+        }
+    }
     
 
-    if (GetAsyncKeyState('S') & 0x53) {
-
-
-        //std::cout << "Hourra";
-        // hero.pos = map.grille[x][y + 1];
-
-
-
-        for (int x = 0; x < 10; ++x) {
-            for (int y = 0; y < 20; ++y) {
-                if (hero.pos = map.grille[x][y]) {
-
-                    hero.pos = map.grille[x][y + 1];
-                    
-
-                }
-                std::cout << map.grille[x][y] << ' ';
-                
-
-            }
-            std::cout << '\n';
-        }
-
-            
-           // std::cout << map.grille[x][y];
-    }
       
 
 }
-int main(){
+
+void gameover(Map& map, Hero& hero) {
+
+    while (_kbhit()) (void)_getch();
+
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    while (_kbhit()) (void)_getch();
+
+    system("cls");
+
+    std::cout << "\n";
+    std::cout << "  Game over !! ";
+    std::cout << "\n";
+
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+
+}
+
+
+
+
+int main() {
 
     Map map{};
     Hero hero{};
-
-  
-    init_map2(map, hero);
-   
-
+    Enemy enemy{};
+    Enemy enemy2{};
    
     
+    //Enemy enemy3{};
+
+    init_map(map, hero, enemy, enemy2);
+    Enemy tab[] = { enemy, enemy2 };
+
+   
+    afficher_map(map, hero, tab);
+
     while (true) {
 
-       //afficher_map(map, hero);
 
-       /*
-       for (int x = 0; x < 10; ++x) {
-           for (int y = 0; y < 20; ++y) {
+        deplacement(map, hero);
+        deplacement2(map, hero, tab);
+       
 
-               std::cout << map.grille[x][y];
-           }
 
-       }
-       */
- 
+
+        if (hero.hp <= 0) {
+            afficher_map(map, hero, tab);
+            gameover(map, hero);
+            break;
+        }
+
+        afficher_map(map, hero, tab);
+
+
+        // Touche Échap pour quitter
         if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {
-            std::cout << "Touche Echap detectee !\n";
             break;
         }
 
     }
 
-   
-    
-
-
     return 0;
-
-    
 }
 
 // Exécuter le programme : Ctrl+F5 ou menu Déboguer > Exécuter sans débogage
