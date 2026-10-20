@@ -360,7 +360,7 @@ int main() {
         if ((map.grille[hero.x][(hero.y)] == 3)) {
             afficher_map(map, hero, tab);
             victory(map, hero);
-            break;
+            niveau = 2;
 
         }
 
