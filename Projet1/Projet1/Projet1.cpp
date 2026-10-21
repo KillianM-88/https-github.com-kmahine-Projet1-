@@ -10,6 +10,7 @@
 #include <ctime>
 
 int niveau = 1;
+bool validmove;
 
 struct Map {
 
@@ -17,9 +18,7 @@ struct Map {
     char water = '~';
     char moutain = 'A';
     char exit = 'E';
-
     int grille[10][20] = {};
-    
     int waterzones[5] = {};
 
 };
@@ -29,28 +28,18 @@ struct Map {
 struct Hero {
 
     int hp = 1;
-    //int pos = 10;
     int x = 0;
     int y = 0;
     char cell = 'H'; 
-    /*bool droite = false;
-    bool gauche = false;
-    bool haut = false;
-    bool bas = false;*/
 
 };
 
 struct Enemy {
 
     int hp = 1;
-    //int pos = 10;
     int x = 0;
     int y = 0;
     char cell = 'X';
-    /*bool droite = false;
-    bool gauche = false;
-    bool haut = false;
-    bool bas = false;*/
 
 };
 void init_map(Map& map, Hero& hero, Enemy tab[], int niveau) {
@@ -101,6 +90,9 @@ void init_map(Map& map, Hero& hero, Enemy tab[], int niveau) {
 
     else if (niveau == 2) {
 
+        hero.x = 9;
+        hero.y = 0;
+
         // liste des waterzones
         map.grille[6][8] = 1;
         map.grille[6][9] = 1;
@@ -108,28 +100,28 @@ void init_map(Map& map, Hero& hero, Enemy tab[], int niveau) {
         map.grille[7][9] = 1;
 
         // liste des montagnes
-        map.grille[9][2] = 2;
-        map.grille[9][17] = 2;
-        map.grille[7][14] = 2;
+        map.grille[7][1] = 2;
+        map.grille[7][3] = 2;
+        map.grille[4][12] = 2;
 
         // Mise en place de la sortie
-        map.grille[9][19] = 3;
+        map.grille[0][10] = 3;
 
         // Mise en place des coord des ennemis
-        tab[0].x = 0;
-        tab[0].y = 7;
+        tab[0].x = 1;
+        tab[0].y = 2;
 
-        tab[1].x = 6;
-        tab[1].y = 14;
+        tab[1].x = 5;
+        tab[1].y = 12;
 
-        tab[2].x = 5;
+        tab[2].x = 7;
         tab[2].y = 4;
 
-        tab[3].x = 1;
-        tab[3].y = 12;
+        tab[3].x = 3;
+        tab[3].y = 18;
 
-        tab[4].x = 7;
-        tab[4].y = 16;
+        tab[4].x = 6;
+        tab[4].y = 10;
 
     }
     
@@ -183,21 +175,34 @@ void afficher_map(Map& map, Hero& hero, Enemy tab[]) {
         }
         std::cout << '\n';
     }
-    std::cout << "Vous avez : " << hero.hp << " vie";
+    std::cout << '\n' << "Level " << niveau << '\n' << '\n';
+    std::cout << "Vous avez : " << hero.hp << " vie" << '\n';
+    std::cout << '\n' << "Up : Z";
+    std::cout << '\n' << "Left : Q";
+    std::cout << '\n' << "Down : S";
+    std::cout << '\n' << "Right : D" << '\n';
+    std::cout << '\n' << "Hero : " << hero.cell;
+    std::cout << '\n' << "Ennemi : " << tab[0].cell;
+    std::cout << '\n' << "Water : " << map.water;
+    std::cout << '\n' << "Moutain : " << map.moutain;
+    std::cout << '\n' << "Exit : " << map.exit;
     
+
+  
 }
 
 
-void deplacement(Map& map, Hero& hero, Enemy tab[]) {
+bool deplacement(Map& map, Hero& hero, Enemy tab[], bool& validmove) {
 
     char touche = _getch();
-
+    validmove = false;
 
     if ((touche == 'z' || touche == 'Z' ) && hero.x > 0 ) {
 
         if (map.grille[(hero.x-1)][hero.y] == 0 || map.grille[(hero.x - 1)][hero.y] == 3) {
 
             hero.x--;
+            validmove = true;
         }
         
     }
@@ -208,6 +213,7 @@ void deplacement(Map& map, Hero& hero, Enemy tab[]) {
         if (map.grille[(hero.x + 1)][hero.y] == 0 || map.grille[(hero.x + 1)][hero.y]  == 3) {
 
             hero.x++;
+            validmove = true;
         }
     }
 
@@ -216,6 +222,7 @@ void deplacement(Map& map, Hero& hero, Enemy tab[]) {
         if (map.grille[hero.x][(hero.y - 1)] == 0 || map.grille[hero.x][(hero.y - 1)] == 3) {
 
             hero.y--;
+            validmove = true;
         }
         
     }
@@ -225,6 +232,7 @@ void deplacement(Map& map, Hero& hero, Enemy tab[]) {
         if (map.grille[hero.x][(hero.y + 1)] == 0 || map.grille[hero.x][(hero.y + 1)] == 3) {
 
             hero.y++;
+            validmove = true;
         }
 
     }
@@ -235,11 +243,10 @@ void deplacement(Map& map, Hero& hero, Enemy tab[]) {
         }
     }
     
+    return validmove;
 }
 
 void deplacement2(Map& map, Hero& hero, Enemy tab[]) {
-
-    //int nb = 1 + rand() % 4; // rand() % 4 donne un reste compris entre 0 et 3 car le reste d'une division par 4 vaut toujours 0, 1, 2 ou 3
 
     for (int i = 0; i < 5; ++i) {
 
@@ -337,11 +344,6 @@ int main() {
 
     Map map{};
     Hero hero{};
-    //Enemy enemy{};
-    //Enemy enemy2{};
-   
-    
-    //Enemy enemy3{};
     Enemy tab[5];
 
     init_map(map, hero, tab, niveau);
@@ -350,7 +352,7 @@ int main() {
     while (true) {
 
 
-        deplacement(map, hero, tab);
+        deplacement(map, hero, tab, validmove);
 
         if (hero.hp <= 0) {
             afficher_map(map, hero, tab);
@@ -358,13 +360,29 @@ int main() {
             break;
         }
         if ((map.grille[hero.x][(hero.y)] == 3)) {
+
             afficher_map(map, hero, tab);
+
             victory(map, hero);
-            niveau = 2;
+            if (niveau == 1) {
+                niveau = 2;
+                init_map(map, hero, tab, niveau);
+                //continue;
+            }
+            else if (niveau == 2) {
+                std::cout << "\n";
+                std::cout << "GG T'AS FINI LE JEUU";
+                std::this_thread::sleep_for(std::chrono::seconds(2));
+                break;
+            }
+           
 
         }
-
-        deplacement2(map, hero, tab);
+        if (validmove == true ) {
+            deplacement2(map, hero, tab);
+            afficher_map(map, hero, tab);
+        }
+        
 
         if (hero.hp <= 0) {
             afficher_map(map, hero, tab);
@@ -372,10 +390,7 @@ int main() {
             break;
         }
        
-
         
-
-        afficher_map(map, hero, tab);
 
 
         // Touche Échap pour quitter
