@@ -8,6 +8,7 @@
 #include <chrono> // Pour std::chrono::seconds / milliseconds
 #include <thread> // Pour std::this_thread::sleep_for
 #include <ctime> // srand(time(NULL))
+#include <fstream> et <string> // pour le parser
 
 int niveau = 1;
 
@@ -191,12 +192,12 @@ void afficher_map(Map& map, Hero& hero, Enemy tab[]) {
 }
 
 
-bool deplacement(Map& map, Hero& hero, Enemy tab[], bool& validmove) {
+bool deplacement(Map& map, Hero& hero, Enemy tab[]) {
 
     // Fonction qui prend en compte les entrées claviers ZQSD et modifie les coordonnées du héros en conséquence
 
     char touche = _getch();
-    validmove = false;
+    bool validmove = false;
 
     if ((touche == 'z' || touche == 'Z' ) && hero.x > 0 ) {
 
@@ -296,9 +297,7 @@ void deplacement2(Map& map, Hero& hero, Enemy tab[]) {
             hero.hp--;
         }
     }
-    
 
-      
 
 }
 
@@ -362,7 +361,7 @@ int main() {
         bool validmove;
 
 
-        deplacement(map, hero, tab, validmove);
+        validmove = deplacement(map, hero, tab);
 
         if (hero.hp <= 0) {
             afficher_map(map, hero, tab);
