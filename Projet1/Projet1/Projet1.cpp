@@ -2,13 +2,13 @@
 //
 
 #include <iostream>
-#include <windows.h> // Fournit system("cls") (pour effacer l'écran de la console) et GetAsyncKeyState(VK_ESCAPE) pour détecter la touche Échap 
-#include <cstdlib>  // Fournit rand() et srand
-#include <conio.h> // Fournit _getch() et _kbhit() (pour vérifier si une touche a été pressée).
+#include <cstdlib>  // Fournit rand(), srand et system("cls") (pour effacer l'écran de la console)
+#include <conio.h> // Fournit _getch() 
 #include <chrono> // Pour std::chrono::seconds / milliseconds
 #include <thread> // Pour std::this_thread::sleep_for
 #include <ctime> // srand(time(NULL))
-#include <fstream> et <string> // pour le parser
+#include <fstream> 
+#include <string> 
 
 int niveau = 1;
 
@@ -20,7 +20,6 @@ struct Map {
     char moutain = 'A';
     char exit = 'E';
     int grille[10][20] = {};
-    int waterzones[5] = {};
 
 };
 
@@ -44,87 +43,141 @@ struct Enemy {
 
 };
 
-void init_map(Map& map, Hero& hero, Enemy tab[], int niveau) {
+bool load_level(Map& map, Hero& hero, Enemy tab[], int niveau) {
 
-    // Fonction qui gère la mise en place des caractéristique de la map en fonction du niveau
+    std::string nomFichier = "levels/level" + std::to_string(niveau) + ".txt";
+    std::ifstream fichier(nomFichier);
 
-    for (int x = 0; x < 10; ++x) {
-        for (int y = 0; y < 20; ++y) {
-            map.grille[x][y] = 0;
+    if (!fichier.is_open()) {
+        std::cout << "Erreur : impossible d'ouvrir " << nomFichier << '\n';
+        return false;
+    }
+
+    std::string lignes[10];
+    std::string ligne;
+    int nblignes = 0;
+
+    while (std::getline(fichier, ligne)) {
+
+        if (nblignes < 10) {
+            lignes[nblignes] = ligne;
+        }
+
+        nblignes++;
+    }
+
+    if (nblignes != 10) {
+
+        std::cout << "Erreur le fichier contient " << nblignes << " lignes au lieu de 10" << '\n';
+
+        return false;
+    }
+
+    for (int i = 0; i < 10; ++i) {
+        if (lignes[i].size() != 20) {
+
+            std::cout << "Erreur la ligne " << i + 1 << " contient "<< lignes[i].size() << " caracteres au lieu de 20" << '\n';
+
+            return false;
         }
     }
 
-    if (niveau == 1) {
+    char charvalides[6] = { 'A', 'X', 'E','H', '.', '~', };
+    for (int i = 0; i < 10; ++i) {
+        for (int j = 0; j < 20; ++j) {
+            bool validchar = false;
+            for (int k = 0; k < 6; k++) {
 
-        // liste des waterzones
-        map.grille[5][6] = 1;
-        map.grille[5][7] = 1;
-        map.grille[3][15] = 1;
-        map.grille[3][16] = 1;
-
-        // liste des montagnes
-        map.grille[9][2] = 2;
-        map.grille[9][17] = 2;
-        map.grille[7][14] = 2;
-
-        // Mise en place de la sortie
-        map.grille[9][19] = 3;
-
-        // Mise en place des coord des ennemis
-        tab[0].x = 0;
-        tab[0].y = 7;
-
-        tab[1].x = 6;
-        tab[1].y = 14;
-
-        tab[2].x = 5;
-        tab[2].y = 4;
-
-        tab[3].x = 1;
-        tab[3].y = 12;
-
-        tab[4].x = 7;
-        tab[4].y = 16;
+                if (lignes[i][j] == charvalides[k]) {
+                    validchar = true;
+                }
+            }
+            if (validchar == false) {
+                std::cout << "Erreur le caractere " << j + 1 << " de la " << i + 1 << " eme ligne n'est pas valide" << '\n';
+                return false;
+            }
+        }
     }
 
-    else if (niveau == 2) {
+    int nb_H = 0;
+    int nb_E = 0;
+    int nb_X = 0;
 
-        hero.x = 9;
-        hero.y = 0;
+    for (int i = 0; i < 10; ++i) {
+        for (int j = 0; j < 20; ++j) {
 
-        // liste des waterzones
-        map.grille[6][8] = 1;
-        map.grille[6][9] = 1;
-        map.grille[7][8] = 1;
-        map.grille[7][9] = 1;
-
-        // liste des montagnes
-        map.grille[7][1] = 2;
-        map.grille[7][3] = 2;
-        map.grille[4][12] = 2;
-
-        // Mise en place de la sortie
-        map.grille[0][10] = 3;
-
-        // Mise en place des coord des ennemis
-        tab[0].x = 1;
-        tab[0].y = 2;
-
-        tab[1].x = 5;
-        tab[1].y = 12;
-
-        tab[2].x = 7;
-        tab[2].y = 4;
-
-        tab[3].x = 3;
-        tab[3].y = 18;
-
-        tab[4].x = 6;
-        tab[4].y = 10;
-
+            if (lignes[i][j] == 'H') {
+                nb_H += 1;
+            }
+            else if (lignes[i][j] == 'E') {
+                nb_E += 1;
+            }
+            else if (lignes[i][j] == 'X') {
+                nb_X += 1;
+            }
+        }
     }
-    
 
+    if (nb_H != 1) {
+
+        std::cout << "Erreur il y a " << nb_H << " H sur la map" << "\n";
+        return false;
+    }
+
+    else if (nb_E != 1) {
+
+        std::cout << "Erreur il y a " << nb_E << " E sur la map" << "\n";
+        return false;
+    }
+
+    else if (nb_X != 5) {
+
+        std::cout << "Erreur il y a " << nb_X << " X sur la map" << "\n";
+        return false;
+    }
+
+    int nbenemy = 0;
+    for (int i = 0; i < 10; ++i) {
+        for (int j = 0; j < 20; ++j) {
+
+            if (lignes[i][j] == '.') {
+
+                map.grille[i][j] = 0;
+            }
+
+            else if (lignes[i][j] == '~') {
+
+                map.grille[i][j] = 1;
+            }
+
+            else if (lignes[i][j] == 'A') {
+                map.grille[i][j] = 2;
+            }
+
+            else if (lignes[i][j] == 'E') {
+                map.grille[i][j] = 3;
+            }
+
+            else if (lignes[i][j] == 'H') {
+
+                map.grille[i][j] = 0;
+
+                hero.x = i;
+                hero.y = j;
+
+            }
+
+            else if (lignes[i][j] == 'X') {
+
+                map.grille[i][j] = 0;
+                tab[nbenemy].x = i;
+                tab[nbenemy].y = j;
+                nbenemy++;
+            }
+        }
+    }
+
+    return true;
 }
 
 void afficher_map(Map& map, Hero& hero, Enemy tab[]) {
@@ -301,47 +354,33 @@ void deplacement2(Map& map, Hero& hero, Enemy tab[]) {
 
 }
 
-void gameover(Map& map, Hero& hero) {
 
-    // Fonction qui gère la fin de partie lorsque le joueur atteint 0 hp
+void endgame(Hero& hero) {
 
-    while (_kbhit()) (void)_getch();
-
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-
-    while (_kbhit()) (void)_getch();
-
-    system("cls");
-
-    std::cout << "\n";
-    std::cout << "  Game over !! ";
-    std::cout << "\n";
-
-    std::this_thread::sleep_for(std::chrono::seconds(3));
-
-}
-
-void victory(Map& map, Hero& hero) {
-
-    // Fonction qui gère la fin de partie lorsque le joueur atteint la sortie
-
-    while (_kbhit()) (void)_getch();
+    // Fonction qui gère la fin de partie selon les hp du joueur
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
-    while (_kbhit()) (void)_getch();
-
     system("cls");
 
-    std::cout << "\n";
-    std::cout << "  Victory  !! ";
-    std::cout << "\n";
+    if (hero.hp > 0) {
 
-    std::this_thread::sleep_for(std::chrono::seconds(3));
+        std::cout << "\n";
+        std::cout << "  Victory  !! ";
+        std::cout << "\n";
+    }
+    
+    else {
+
+        std::cout << "\n";
+        std::cout << "  Game over !! ";
+        std::cout << "\n";
+    }
+
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
 
 }
-
-
 
 
 int main() {
@@ -353,40 +392,52 @@ int main() {
     Hero hero{};
     Enemy tab[5];
 
-    init_map(map, hero, tab, niveau);
+    if (!load_level(map, hero, tab, niveau)) {
+
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        return 1;
+        
+    }
     afficher_map(map, hero, tab);
 
     while (true) {
 
         bool validmove;
+        
 
 
         validmove = deplacement(map, hero, tab);
 
         if (hero.hp <= 0) {
             afficher_map(map, hero, tab);
-            gameover(map, hero);
+            endgame(hero);
             break;
         }
         if ((map.grille[hero.x][(hero.y)] == 3)) {
 
             afficher_map(map, hero, tab);
 
-            victory(map, hero);
+            endgame(hero);
             if (niveau == 1) {
                 niveau = 2;
-                init_map(map, hero, tab, niveau);
-                //continue;
+                if (!load_level(map, hero, tab, niveau)) {
+                    std::this_thread::sleep_for(std::chrono::seconds(2));
+                    break;
+                }
+                validmove = false;
+                afficher_map(map, hero, tab);
             }
+
             else if (niveau == 2) {
                 std::cout << "\n";
-                std::cout << "GG T'AS FINI LE JEUU";
+                std::cout << "  ***CONGRATULATIONS*** ";
                 std::this_thread::sleep_for(std::chrono::seconds(2));
                 break;
             }
            
 
         }
+
         if (validmove == true ) {
             deplacement2(map, hero, tab);
             afficher_map(map, hero, tab);
@@ -395,13 +446,7 @@ int main() {
 
         if (hero.hp <= 0) {
             afficher_map(map, hero, tab);
-            gameover(map, hero);
-            break;
-        }
-       
-
-        // Touche Échap pour quitter
-        if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {
+            endgame(hero);
             break;
         }
 
